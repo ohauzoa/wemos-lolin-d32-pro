@@ -2,7 +2,6 @@
 #include "BluetoothSerial.h"
 #include "BluetoothA2DPSink.h"
 
-
 TaskHandle_t Task1;
 TaskHandle_t Task2;
 
@@ -47,7 +46,7 @@ void TaskInit(void)
                     NULL,        /* parameter of the task */
                     1,           /* priority of the task */
                     &Task1,      /* Task handle to keep track of created task */
-                    0);          /* pin task to core 0 */                  
+                    PRO_CPU_NUM);          /* pin task to core 0 */                  
   delay(500); 
 
   //create a task that will be executed in the Task2code() function, with priority 1 and executed on core 1
@@ -58,6 +57,6 @@ void TaskInit(void)
                     NULL,        /* parameter of the task */
                     1,           /* priority of the task */
                     &Task2,      /* Task handle to keep track of created task */
-                    1);          /* pin task to core 1 */
+                    APP_CPU_NUM);          /* pin task to core 1 */
   delay(500); 
 }

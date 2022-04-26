@@ -1,7 +1,10 @@
 #include <Arduino.h>
+#include <SerialCommands.h>
 #include "BluetoothSerial.h"
 #include "BluetoothA2DPSink.h"
 #include "thread.h"
+#include "pwm.h"
+
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -16,7 +19,16 @@ BluetoothSerial SerialBT;
 BluetoothA2DPSink a2dp_sink;
 
 
+char serial_command_buffer_[32];
+SerialCommands serial_commands_(&Serial, serial_command_buffer_, sizeof(serial_command_buffer_), "\r\n", " ");
 
+//This is the default handler, and gets called when no other command matches. 
+void cmd_unrecognized(SerialCommands* sender, const char* cmd)
+{
+  sender->GetSerial()->print("Unrecognized command [");
+  sender->GetSerial()->print(cmd);
+  sender->GetSerial()->println("]");
+}
 
 
 
@@ -57,8 +69,9 @@ void setup() {
     a2dp_sink.set_i2s_config(i2s_config);
     a2dp_sink.start("MyMusic");
 
-
-
+  serial_commands_.SetDefaultHandler(cmd_unrecognized);
+  
+  pwm_init();
   TaskInit();
 
 }
@@ -71,5 +84,6 @@ void loop() {
     Serial.write(SerialBT.read());
   }
   delay(20);
+  serial_commands_.ReadSerial();
 }
 
